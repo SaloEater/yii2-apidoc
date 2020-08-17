@@ -7,7 +7,7 @@
 
 namespace yii\apidoc\models;
 
-use phpDocumentor\Reflection\FileReflector;
+use phpDocumentor\Reflection\Php\File;
 use yii\base\Component;
 
 /**
@@ -65,25 +65,21 @@ class Context extends Component
 
     /**
      * Adds file to context
-     * @param string $fileName
      */
-    public function addFile($fileName)
+    public function addFile(File $file): void
     {
-        $this->files[$fileName] = sha1_file($fileName);
+        $this->files[$file->getPath()] = sha1_file($file->getPath());
 
-        $reflection = new FileReflector($fileName, true);
-        $reflection->process();
-
-        foreach ($reflection->getClasses() as $class) {
-            $class = new ClassDoc($class, $this, ['sourceFile' => $fileName]);
+        foreach ($file->getClasses() as $class) {
+            $class = new ClassDoc($class, $this, ['sourceFile' => $file]);
             $this->classes[$class->name] = $class;
         }
-        foreach ($reflection->getInterfaces() as $interface) {
-            $interface = new InterfaceDoc($interface, $this, ['sourceFile' => $fileName]);
+        foreach ($file->getInterfaces() as $interface) {
+            $interface = new InterfaceDoc($interface, $this, ['sourceFile' => $file]);
             $this->interfaces[$interface->name] = $interface;
         }
-        foreach ($reflection->getTraits() as $trait) {
-            $trait = new TraitDoc($trait, $this, ['sourceFile' => $fileName]);
+        foreach ($file->getTraits() as $trait) {
+            $trait = new TraitDoc($trait, $this, ['sourceFile' => $file]);
             $this->traits[$trait->name] = $trait;
         }
     }

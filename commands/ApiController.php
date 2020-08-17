@@ -7,6 +7,8 @@
 
 namespace yii\apidoc\commands;
 
+use phpDocumentor\Reflection\File\LocalFile;
+use phpDocumentor\Reflection\Php\ProjectFactory;
 use yii\apidoc\components\BaseController;
 use yii\apidoc\models\Context;
 use yii\apidoc\renderers\ApiRenderer;
@@ -95,7 +97,12 @@ class ApiController extends BaseController
         $this->stdout($fileCount . ' file' . ($fileCount == 1 ? '' : 's') . ' to update.' . PHP_EOL);
         Console::startProgress(0, $fileCount, 'Processing files... ', false);
         $done = 0;
-        foreach ($files as $file) {
+
+        $projectFactory = ProjectFactory::createInstance();
+        $filesMap = array_map(fn ($file) => new LocalFile($file), $files);
+        $project = $projectFactory->create("Test", $filesMap);
+
+        foreach ($project->getFiles() as $file) {
             $context->addFile($file);
             Console::updateProgress(++$done, $fileCount);
         }
